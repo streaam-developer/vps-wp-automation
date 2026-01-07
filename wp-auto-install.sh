@@ -207,6 +207,12 @@ install_domain(){
   DB_PASS=$(openssl rand -base64 16)
   ADMIN_EMAIL="admin@$DOMAIN"
 
+  # Pick random title and tagline
+  TITLE_INDEX=$((RANDOM % ${#TITLES[@]}))
+  TITLE=${TITLES[$TITLE_INDEX]}
+  TAGLINE_INDEX=$((RANDOM % ${#TAGLINES[@]}))
+  TAGLINE=${TAGLINES[$TAGLINE_INDEX]}
+
   mkdir -p "$ROOT"
   cd "$ROOT" || exit 1
 
@@ -240,12 +246,14 @@ EOF
 
   wp core install \
     --url="https://$DOMAIN" \
-    --title="$DOMAIN" \
+    --title="$TITLE" \
     --admin_user="$ADMIN_USER" \
     --admin_password="$ADMIN_PASS" \
     --admin_email="$ADMIN_EMAIL" \
     --skip-email \
     --allow-root || exit 1
+
+  wp option update blogdescription "$TAGLINE" --allow-root
 
   wp user create "$PUB_USER" "publisher@$DOMAIN" \
     --role=author \
