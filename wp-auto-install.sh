@@ -11,6 +11,7 @@ REPORT_FILE="/home/ubuntu/install-report.txt"
 
 PLUGIN_DIR="/home/ubuntu/wp-auto-req/plugin"
 THEME_DIR="/home/ubuntu/wp-auto-req/theme"
+FAVICON_FILE="/home/ubuntu/favicon.ico"
 
 ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
@@ -23,6 +24,33 @@ APP_NAME="publisher-app"
 
 PARALLEL_JOBS=3
 CERTBOT_LOCK="/var/run/certbot-global.lock"
+
+# News site titles and taglines
+TITLES=(
+  "Breaking News Hub"
+  "Daily News Update"
+  "News Central"
+  "Global News Network"
+  "Local News Today"
+  "News Flash"
+  "The News Bulletin"
+  "Headline News"
+  "News Wire"
+  "Current Affairs"
+)
+
+TAGLINES=(
+  "Stay Informed with the Latest News"
+  "Your Source for Breaking Stories"
+  "News That Matters"
+  "Connecting You to the World"
+  "Timely Updates on Current Events"
+  "Reliable News Coverage"
+  "In-Depth Reporting"
+  "Fast, Accurate News"
+  "Your Daily News Digest"
+  "Empowering Through Information"
+)
 
 ####################################
 # LOGGING
@@ -243,9 +271,37 @@ update_user_meta(\$u->ID,'_application_passwords',\$apps);
     [ -f "$p" ] && wp plugin install "$p" --activate --allow-root
   done
 
-  for t in "$THEME_DIR"/*.zip; do
-    [ -f "$t" ] && wp theme install "$t" --activate --allow-root
-  done
+  # Delete default plugins
+  wp plugin is-installed akismet && wp plugin delete akismet --allow-root || true
+  wp plugin is-installed hello && wp plugin delete hello --allow-root || true
+
+  # Pick and install one theme
+  THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
+  if [ -f "$THEME_FILE" ]; then
+    THEME_NAME=$(basename "$THEME_FILE" .zip)
+    wp theme install "$THEME_FILE" --allow-root
+    wp theme activate "$THEME_NAME" --allow-root
+    # Delete default themes
+    wp theme is-installed twentytwentyfour && wp theme delete twentytwentyfour --allow-root || true
+    wp theme is-installed twentytwentythree && wp theme delete twentytwentythree --allow-root || true
+    wp theme is-installed twentytwentytwo && wp theme delete twentytwentytwo --allow-root || true
+    wp theme is-installed twentyseventeen && wp theme delete twentyseventeen --allow-root || true
+  fi
+
+  # Delete default post
+  wp post delete 1 --force --allow-root || true
+
+  # Set permalink structure
+  wp rewrite structure '/%postname%/' --allow-root
+
+  # Set timezone
+  wp option update timezone_string 'Asia/Kolkata' --allow-root
+
+  # Set favicon
+  if [ -f "$FAVICON_FILE" ]; then
+    ATTACHMENT_ID=$(wp media import "$FAVICON_FILE" --porcelain --allow-root)
+    wp option update site_icon "$ATTACHMENT_ID" --allow-root
+  fi
 
   setup_nginx "$DOMAIN" "$ROOT"
   nginx -t && systemctl reload nginx || WARN "nginx reload skipped"
