@@ -60,21 +60,25 @@ delete_domain(){
 
   LOG "START DELETE: $DOMAIN"
 
-  # Get DB info from report
-  DB_INFO=$(grep "^$DOMAIN |" "$REPORT_FILE" || true)
-  if [ -n "$DB_INFO" ]; then
-    DB_NAME=$(echo "$DB_INFO" | awk -F' | ' '{print $2}')
-    DB_USER=$(echo "$DB_INFO" | awk -F' | ' '{print $3}')
+  # Get DB info from WordPress config if site exists
+  if [ -d "$ROOT" ] && [ -f "$ROOT/wp-config.php" ]; then
+    cd "$ROOT" || return
+    DB_NAME=$(wp config get DB_NAME --allow-root 2>/dev/null || echo "")
+    DB_USER=$(wp config get DB_USER --allow-root 2>/dev/null || echo "")
 
-    # Drop database and user
-    mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
+    if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ]; then
+      # Drop database and user
+      mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
 DROP DATABASE IF EXISTS \`$DB_NAME\`;
 DROP USER IF EXISTS '$DB_USER'@'localhost';
 FLUSH PRIVILEGES;
 EOF
-    LOG "Dropped DB $DB_NAME and user $DB_USER for $DOMAIN"
+      LOG "Dropped DB $DB_NAME and user $DB_USER for $DOMAIN"
+    else
+      WARN "Could not retrieve DB info from wp-config for $DOMAIN"
+    fi
   else
-    WARN "No DB info found for $DOMAIN in report"
+    WARN "Site directory or wp-config not found for $DOMAIN"
   fi
 
   # Remove nginx config
