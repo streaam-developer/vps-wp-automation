@@ -292,24 +292,28 @@ EOF
   sudo -u www-data wp plugin delete akismet || true
   sudo -u www-data wp plugin delete hello || true
 
-  # Install all themes
+  # Install themes
   if [ -n "$(ls -A /tmp/wp-assets/*.zip 2>/dev/null)" ]; then
-    for t in /tmp/wp-assets/*.zip; do
-      [ -f "$t" ] && sudo -u www-data wp theme install "$t" || true
+    # Get list of zips
+    ZIP_LIST=(/tmp/wp-assets/*.zip)
+    # Pick random zip
+    RANDOM_ZIP=${ZIP_LIST[$RANDOM % ${#ZIP_LIST[@]}]}
+    # Install and activate the random one
+    sudo -u www-data wp theme install "$RANDOM_ZIP" || true
+    THEME_SLUG=$(basename "$RANDOM_ZIP" .zip | sed 's/\.[0-9]*\.[0-9]*$//' | sed 's/\.[0-9]*$//')
+    sudo -u www-data wp theme activate "$THEME_SLUG" || true
+    # Remove the activated zip from list
+    ZIP_LIST=(${ZIP_LIST[@]/$RANDOM_ZIP})
+    # Install the remaining
+    for t in "${ZIP_LIST[@]}"; do
+      sudo -u www-data wp theme install "$t" || true
     done
-    # Get list of installed themes, excluding defaults
-    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=name --status=inactive --status=active | grep -v -E '(twentytwentyfive|twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
-    if [ -n "$INSTALLED_THEMES" ]; then
-      # Pick random theme to activate
-      THEME_TO_ACTIVATE=$(echo "$INSTALLED_THEMES" | shuf | head -1)
-      sudo -u www-data wp theme activate "$THEME_TO_ACTIVATE" || true
-    fi
     # Delete default themes
-    sudo -u www-data wp theme is-installed twentytwentyfive && sudo -u www-data wp theme delete twentytwentyfive || true
-    sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
-    sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
-    sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
-    sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
+    sudo -u www-data wp theme delete twentytwentyfive || true
+    sudo -u www-data wp theme delete twentytwentyfour || true
+    sudo -u www-data wp theme delete twentytwentythree || true
+    sudo -u www-data wp theme delete twentytwentytwo || true
+    sudo -u www-data wp theme delete twentyseventeen || true
     # Delete inactive themes
     sudo -u www-data wp theme list --status=inactive --field=name | xargs -I {} sudo -u www-data wp theme delete {} || true
   fi
@@ -354,6 +358,19 @@ detect_php_fpm
 setup_mysql
 wait_for_mysql
 ensure_nginx
+
+# Add default server
+if [ ! -f /etc/nginx/sites-available/default ]; then
+  cat > /etc/nginx/sites-available/default <<EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    return 444;
+}
+EOF
+  ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+  nginx -t && systemctl reload nginx || WARN "nginx reload failed"
+fi
 
 ####################################
 # PARALLEL LOOP
