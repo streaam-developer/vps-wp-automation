@@ -290,7 +290,7 @@ EOF
 
   # Delete default plugins
   sudo -u www-data wp plugin delete akismet || true
-  sudo -u www-data wp plugin delete hello-dolly || true
+  sudo -u www-data wp plugin delete hello || true
 
   # Install all themes
   if [ -n "$(ls -A /tmp/wp-assets/*.zip 2>/dev/null)" ]; then
