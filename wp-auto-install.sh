@@ -276,29 +276,36 @@ EOF
   # APPLICATION PASSWORD
   APP_PASS_PLAIN="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 
-  if [ -d "$PLUGIN_DIR" ] && [ -n "$(ls -A "$PLUGIN_DIR"/*.zip 2>/dev/null)" ]; then
-    for p in "$PLUGIN_DIR"/*.zip; do
+  # Copy assets to temp dir for www-data access
+  mkdir -p /tmp/wp-assets
+  cp "$PLUGIN_DIR"/*.zip /tmp/wp-assets/ 2>/dev/null || true
+  cp "$THEME_DIR"/*.zip /tmp/wp-assets/ 2>/dev/null || true
+  sudo chown -R www-data:www-data /tmp/wp-assets
+
+  if [ -n "$(ls -A /tmp/wp-assets/*.zip 2>/dev/null)" ]; then
+    for p in /tmp/wp-assets/*.zip; do
       [ -f "$p" ] && sudo -u www-data wp plugin install "$p" --activate
     done
   fi
 
   # Delete default plugins
-  sudo -u www-data wp plugin is-installed akismet && sudo -u www-data wp plugin delete akismet || true
-  sudo -u www-data wp plugin is-installed hello-dolly && sudo -u www-data wp plugin delete hello-dolly || true
+  sudo -u www-data wp plugin delete akismet || true
+  sudo -u www-data wp plugin delete hello-dolly || true
 
   # Install all themes
-  if [ -d "$THEME_DIR" ] && [ -n "$(ls -A "$THEME_DIR"/*.zip 2>/dev/null)" ]; then
-    for t in "$THEME_DIR"/*.zip; do
+  if [ -n "$(ls -A /tmp/wp-assets/*.zip 2>/dev/null)" ]; then
+    for t in /tmp/wp-assets/*.zip; do
       [ -f "$t" ] && sudo -u www-data wp theme install "$t" || true
     done
     # Get list of installed themes, excluding defaults
-    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=name --status=inactive --status=active | grep -v -E '(twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
+    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=name --status=inactive --status=active | grep -v -E '(twentytwentyfive|twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
     if [ -n "$INSTALLED_THEMES" ]; then
       # Pick random theme to activate
       THEME_TO_ACTIVATE=$(echo "$INSTALLED_THEMES" | shuf | head -1)
       sudo -u www-data wp theme activate "$THEME_TO_ACTIVATE" || true
     fi
     # Delete default themes
+    sudo -u www-data wp theme is-installed twentytwentyfive && sudo -u www-data wp theme delete twentytwentyfive || true
     sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
     sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
     sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
