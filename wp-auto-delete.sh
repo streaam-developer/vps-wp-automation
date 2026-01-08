@@ -57,6 +57,8 @@ wait_for_mysql(){
 delete_domain(){
   DOMAIN="$1"
   ROOT="$BASE_ROOT/$DOMAIN"
+  DB_NAME=""
+  DB_USER=""
 
   LOG "START DELETE: $DOMAIN"
 
