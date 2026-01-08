@@ -100,7 +100,7 @@ EOF
   nginx -t && systemctl reload nginx || WARN "nginx reload failed"
 
   # Remove SSL cert
-  certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+  sudo certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
 
   # Remove site files
   rm -rf "$ROOT"
