@@ -2,7 +2,7 @@
 set -Euo pipefail
 
 REPORT_FILE="/home/ubuntu/install-report.txt"
-DOMAIN="tessofficial.com"
+DOMAIN="themovlesflix.online"
 
 # Find the line for the domain
 LINE=$(grep "^$DOMAIN " "$REPORT_FILE" || true)
