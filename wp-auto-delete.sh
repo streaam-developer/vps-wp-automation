@@ -100,7 +100,7 @@ EOF
   nginx -t && systemctl reload nginx || WARN "nginx reload failed"
 
   # Remove SSL cert
-  certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+  # certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
 
   # Remove site files
   rm -rf "$ROOT"
@@ -144,12 +144,12 @@ delete_all(){
   nginx -t && systemctl reload nginx || WARN "nginx reload failed"
 
   # Remove SSL certs
-  if [ -f "$DOMAINS_FILE" ]; then
-    while read -r DOMAIN; do
-      [ -z "$DOMAIN" ] && continue
-      certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
-    done < "$DOMAINS_FILE"
-  fi
+  # if [ -f "$DOMAINS_FILE" ]; then
+  #   while read -r DOMAIN; do
+  #     [ -z "$DOMAIN" ] && continue
+  #     certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+  #   done < "$DOMAINS_FILE"
+  # fi
 
   # Clear report file
   > "$REPORT_FILE"

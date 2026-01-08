@@ -187,6 +187,11 @@ setup_ssl(){
   flock -x 200
   ensure_nginx
 
+  if [ -d "/etc/letsencrypt/live/$1" ]; then
+    LOG "SSL already exists for $1"
+    return
+  fi
+
   certbot --nginx \
     -d "$1" -d "www.$1" \
     --non-interactive --agree-tos \
@@ -321,7 +326,7 @@ EOF
   setup_nginx "$DOMAIN" "$ROOT"
   nginx -t && systemctl reload nginx || WARN "nginx reload skipped"
 
-  # setup_ssl "$DOMAIN"  # Temporarily paused
+  setup_ssl "$DOMAIN"  # Temporarily paused
 
   chown -R www-data:www-data "$ROOT"
 
