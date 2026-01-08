@@ -11,7 +11,7 @@ REPORT_FILE="/home/ubuntu/install-report.txt"
 
 PLUGIN_DIR="/home/ubuntu/wp-auto-req/plugin"
 THEME_DIR="/home/ubuntu/wp-auto-req/theme"
-FAVICON_FILE="/home/ubuntu/images.png"
+ICON_DIR="/home/ubuntu/wp-auto-req/icon"
 
 ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
@@ -329,9 +329,13 @@ EOF
   sudo -u www-data wp option update timezone_string 'Asia/Kolkata'
 
   # Set favicon
-  if [ -f "$FAVICON_FILE" ]; then
-    ATTACHMENT_ID=$(sudo -u www-data wp media import "$FAVICON_FILE" --porcelain)
-    sudo -u www-data wp option update site_icon "$ATTACHMENT_ID"
+  if [ -d "$ICON_DIR" ]; then
+    PNG_FILES=("$ICON_DIR"/*.png)
+    if [ ${#PNG_FILES[@]} -gt 0 ]; then
+      RANDOM_PNG=${PNG_FILES[$RANDOM % ${#PNG_FILES[@]}]}
+      ATTACHMENT_ID=$(sudo -u www-data wp media import "$RANDOM_PNG" --porcelain)
+      sudo -u www-data wp option update site_icon "$ATTACHMENT_ID"
+    fi
   fi
 
   setup_nginx "$DOMAIN" "$ROOT"
