@@ -321,7 +321,7 @@ EOF
   setup_nginx "$DOMAIN" "$ROOT"
   nginx -t && systemctl reload nginx || WARN "nginx reload skipped"
 
-  setup_ssl "$DOMAIN"
+  # setup_ssl "$DOMAIN"  # Temporarily paused
 
   chown -R www-data:www-data "$ROOT"
 
