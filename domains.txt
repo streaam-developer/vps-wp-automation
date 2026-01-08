@@ -1,8 +1,2 @@
-indiapulse.website
-dailykhabar.cfd
-indiapulse.cfd
-indiapulse.online
-dailykhabar.cyou
 dailykhabar.bond
-dailykhabar.sbs
-indiapulse.site
+indiapulse.website
