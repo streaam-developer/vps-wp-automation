@@ -23,7 +23,7 @@ setup_mysql(){
   sudo systemctl start mariadb
 
   if mysql -u root -e "SELECT 1;" >/dev/null 2>&1; then
-    MYSQL_ROOT_PASS=$(openssl rand -base64 20)
+    MYSQL_ROOT_PASS="rMuD@e5HH5vuvJE"
     mysql <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASS';
 FLUSH PRIVILEGES;
