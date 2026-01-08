@@ -100,9 +100,6 @@ EOF
   rm -f /etc/nginx/sites-enabled/$DOMAIN
   nginx -t && systemctl reload nginx || WARN "nginx reload failed"
 
-  # Remove SSL cert
-  sudo certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
-
   # Remove site files
   rm -rf "$ROOT"
 
@@ -174,6 +171,16 @@ else
     [ -z "$DOMAIN" ] && continue
     delete_domain "$DOMAIN"
   done < "$DOMAINS_FILE"
+
+  # Delete SSL one by one if multiple domains
+  num_domains=$(grep -c '[^[:space:]]' "$DOMAINS_FILE")
+  if [ "$num_domains" -gt 1 ]; then
+    LOG "Deleting SSL certificates one by one for multiple domains"
+    while read -r DOMAIN; do
+      [ -z "$DOMAIN" ] && continue
+      sudo certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+    done < "$DOMAINS_FILE"
+  fi
 fi
 
 LOG "🎉 ALL DELETES DONE"
