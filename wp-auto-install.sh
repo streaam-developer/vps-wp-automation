@@ -22,7 +22,7 @@ PUB_PASS="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 
 APP_NAME="publisher-app"
 
-PARALLEL_JOBS=3
+PARALLEL_JOBS=10
 CERTBOT_LOCK="/var/run/certbot-global.lock"
 
 # News site titles and taglines
