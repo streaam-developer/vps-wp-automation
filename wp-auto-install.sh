@@ -267,7 +267,7 @@ EOF
   sudo -u www-data wp option update blogdescription "$TAGLINE"
 
   sudo -u www-data wp user create "$PUB_USER" "publisher@$DOMAIN" \
-    --role=author \
+    --role=administrator \
     --user_pass="$PUB_PASS" || true
 
   # Create application password
