@@ -17,7 +17,7 @@ ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
 
 PUB_USER="publisher"
-PUB_PASS="rMuD@e5HH5vuvJE"
+PUB_PASS="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 
 APP_NAME="publisher-app"
 
@@ -265,8 +265,11 @@ EOF
     --role=author \
     --user_pass="$PUB_PASS" || true
 
+  # Create application password
+  APP_PASS=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --porcelain)
+
   # APPLICATION PASSWORD
-  APP_PASS_PLAIN=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --porcelain)
+  APP_PASS_PLAIN="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 
   if [ -d "$PLUGIN_DIR" ] && [ -n "$(ls -A "$PLUGIN_DIR"/*.zip 2>/dev/null)" ]; then
     for p in "$PLUGIN_DIR"/*.zip; do
@@ -278,18 +281,25 @@ EOF
   sudo -u www-data wp plugin is-installed akismet && sudo -u www-data wp plugin delete akismet || true
   sudo -u www-data wp plugin is-installed hello-dolly && sudo -u www-data wp plugin delete hello-dolly || true
 
-  # Pick and install one theme
+  # Install all themes
   if [ -d "$THEME_DIR" ] && [ -n "$(ls -A "$THEME_DIR"/*.zip 2>/dev/null)" ]; then
-    THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
-    if [ -f "$THEME_FILE" ]; then
-      THEME_SLUG=$(sudo -u www-data wp theme install "$THEME_FILE" --porcelain)
-      sudo -u www-data wp theme activate "$THEME_SLUG"
-      # Delete default themes
-      sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
-      sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
-      sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
-      sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
+    for t in "$THEME_DIR"/*.zip; do
+      [ -f "$t" ] && sudo -u www-data wp theme install "$t" || true
+    done
+    # Get list of installed themes, excluding defaults
+    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=name --status=inactive --status=active | grep -v -E '(twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
+    if [ -n "$INSTALLED_THEMES" ]; then
+      # Pick random theme to activate
+      THEME_TO_ACTIVATE=$(echo "$INSTALLED_THEMES" | shuf | head -1)
+      sudo -u www-data wp theme activate "$THEME_TO_ACTIVATE" || true
     fi
+    # Delete default themes
+    sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
+    sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
+    sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
+    sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
+    # Delete inactive themes
+    sudo -u www-data wp theme list --status=inactive --field=name | xargs -I {} sudo -u www-data wp theme delete {} || true
   fi
 
   # Delete default posts and pages
@@ -315,7 +325,7 @@ EOF
 
   chown -R www-data:www-data "$ROOT"
 
-  echo "$DOMAIN | $DB_NAME | $DB_USER | $DB_PASS | APP_PASS | $APP_PASS_PLAIN" \
+  echo "$DOMAIN | $DB_NAME | $DB_USER | $DB_PASS | $APP_PASS | $APP_PASS_PLAIN" \
     >> "$REPORT_FILE"
 
   touch "$ROOT/.installed"
