@@ -60,24 +60,29 @@ delete_domain(){
 
   LOG "START DELETE: $DOMAIN"
 
-  # Get DB info from WordPress config if site exists
-  if [ -d "$ROOT" ] && [ -f "$ROOT/wp-config.php" ]; then
-    DB_NAME=$(grep "define('DB_NAME'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
-    DB_USER=$(grep "define('DB_USER'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
+  # Get DB info from report file first
+  REPORT_LINE=$(grep "^$DOMAIN |" "$REPORT_FILE" || true)
+  if [ -n "$REPORT_LINE" ]; then
+    DB_NAME=$(echo "$REPORT_LINE" | awk -F' | ' '{print $2}')
+    DB_USER=$(echo "$REPORT_LINE" | awk -F' | ' '{print $3}')
+  else
+    # Fallback to WordPress config if site exists
+    if [ -d "$ROOT" ] && [ -f "$ROOT/wp-config.php" ]; then
+      DB_NAME=$(grep "define('DB_NAME'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
+      DB_USER=$(grep "define('DB_USER'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
+    fi
+  fi
 
-    if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ]; then
-      # Drop database and user
-      mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
+  if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ]; then
+    # Drop database and user
+    mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
 DROP DATABASE IF EXISTS \`$DB_NAME\`;
 DROP USER IF EXISTS '$DB_USER'@'localhost';
 FLUSH PRIVILEGES;
 EOF
-      LOG "Dropped DB $DB_NAME and user $DB_USER for $DOMAIN"
-    else
-      WARN "Could not retrieve DB info from wp-config for $DOMAIN"
-    fi
+    LOG "Dropped DB $DB_NAME and user $DB_USER for $DOMAIN"
   else
-    WARN "Site directory or wp-config not found for $DOMAIN"
+    WARN "Could not retrieve DB info for $DOMAIN"
   fi
 
   # Remove nginx config
