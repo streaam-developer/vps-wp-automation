@@ -224,10 +224,12 @@ install_domain(){
   mkdir -p "$ROOT"
   cd "$ROOT" || exit 1
 
+  chown -R www-data:www-data "$ROOT"
+
   # 🔥 FIX: remove old wp-config to avoid mismatch
   [ -f wp-config.php ] && rm -f wp-config.php
 
-  wp core download --allow-root || true
+  sudo -u www-data wp core download || true
 
   mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;
@@ -242,34 +244,31 @@ EOF
     exit 1
   }
 
-  wp config create \
+  sudo -u www-data wp config create \
     --dbname="$DB_NAME" \
     --dbuser="$DB_USER" \
     --dbpass="$DB_PASS" \
     --dbhost=localhost \
-    --skip-check \
-    --allow-root || exit 1
+    --skip-check || exit 1
 
   export WP_CLI_PHP_ARGS="-d variables_order=EGPCS"
 
-  wp core install \
+  sudo -u www-data wp core install \
     --url="https://$DOMAIN" \
     --title="$TITLE" \
     --admin_user="$ADMIN_USER" \
     --admin_password="$ADMIN_PASS" \
     --admin_email="$ADMIN_EMAIL" \
-    --skip-email \
-    --allow-root || exit 1
+    --skip-email || exit 1
 
-  wp option update blogdescription "$TAGLINE" --allow-root
+  sudo -u www-data wp option update blogdescription "$TAGLINE"
 
-  wp user create "$PUB_USER" "publisher@$DOMAIN" \
+  sudo -u www-data wp user create "$PUB_USER" "publisher@$DOMAIN" \
     --role=author \
-    --user_pass="$PUB_PASS" \
-    --allow-root || true
+    --user_pass="$PUB_PASS" || true
 
   # APPLICATION PASSWORD
-  wp eval --allow-root "
+  sudo -u www-data wp eval "
 \$u=get_user_by('login','$PUB_USER');
 \$apps=get_user_meta(\$u->ID,'_application_passwords',true);
 if(!is_array(\$apps))\$apps=[];
@@ -284,39 +283,39 @@ update_user_meta(\$u->ID,'_application_passwords',\$apps);
 "
 
   for p in "$PLUGIN_DIR"/*.zip; do
-    [ -f "$p" ] && wp plugin install "$p" --activate --allow-root
+    [ -f "$p" ] && sudo -u www-data wp plugin install "$p" --activate
   done
 
   # Delete default plugins
-  wp plugin is-installed akismet && wp plugin delete akismet --allow-root || true
-  wp plugin is-installed hello-dolly && wp plugin delete hello-dolly --allow-root || true
+  sudo -u www-data wp plugin is-installed akismet && sudo -u www-data wp plugin delete akismet || true
+  sudo -u www-data wp plugin is-installed hello-dolly && sudo -u www-data wp plugin delete hello-dolly || true
 
   # Pick and install one theme
   THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
   if [ -f "$THEME_FILE" ]; then
-    THEME_SLUG=$(wp theme install "$THEME_FILE" --porcelain --allow-root)
-    wp theme activate "$THEME_SLUG" --allow-root
+    THEME_SLUG=$(sudo -u www-data wp theme install "$THEME_FILE" --porcelain)
+    sudo -u www-data wp theme activate "$THEME_SLUG"
     # Delete default themes
-    wp theme is-installed twentytwentyfour && wp theme delete twentytwentyfour --allow-root || true
-    wp theme is-installed twentytwentythree && wp theme delete twentytwentythree --allow-root || true
-    wp theme is-installed twentytwentytwo && wp theme delete twentytwentytwo --allow-root || true
-    wp theme is-installed twentyseventeen && wp theme delete twentyseventeen --allow-root || true
+    sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
+    sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
+    sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
+    sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
   fi
 
   # Delete default posts and pages
-  wp post list --post_type=post --allow-root --format=ids | xargs wp post delete --force --allow-root || true
-  wp post list --post_type=page --allow-root --format=ids | xargs wp post delete --force --allow-root || true
+  sudo -u www-data wp post list --post_type=post --format=ids | xargs sudo -u www-data wp post delete --force || true
+  sudo -u www-data wp post list --post_type=page --format=ids | xargs sudo -u www-data wp post delete --force || true
 
   # Set permalink structure
-  wp rewrite structure '/%postname%/' --allow-root
+  sudo -u www-data wp rewrite structure '/%postname%/'
 
   # Set timezone
-  wp option update timezone_string 'Asia/Kolkata' --allow-root
+  sudo -u www-data wp option update timezone_string 'Asia/Kolkata'
 
   # Set favicon
   if [ -f "$FAVICON_FILE" ]; then
-    ATTACHMENT_ID=$(wp media import "$FAVICON_FILE" --porcelain --allow-root)
-    wp option update site_icon "$ATTACHMENT_ID" --allow-root
+    ATTACHMENT_ID=$(sudo -u www-data wp media import "$FAVICON_FILE" --porcelain)
+    sudo -u www-data wp option update site_icon "$ATTACHMENT_ID"
   fi
 
   setup_nginx "$DOMAIN" "$ROOT"
