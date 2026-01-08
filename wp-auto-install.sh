@@ -11,7 +11,7 @@ REPORT_FILE="/home/ubuntu/install-report.txt"
 
 PLUGIN_DIR="/home/ubuntu/wp-auto-req/plugin"
 THEME_DIR="/home/ubuntu/wp-auto-req/theme"
-FAVICON_FILE="/home/ubuntu/favicon.ico"
+FAVICON_FILE="/home/ubuntu/images.png"
 
 ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
