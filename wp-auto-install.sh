@@ -271,7 +271,7 @@ EOF
     --user_pass="$PUB_PASS" || true
 
   # Create application password
-  APP_PASS=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --password="$APP_PASS_PLAIN" --porcelain) || APP_PASS="$APP_PASS_PLAIN"
+  APP_PASS=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --porcelain)
 
   # APPLICATION PASSWORD
   APP_PASS_PLAIN="LpKz iSnw 0VfM 2rKn O4VV YLyM"
@@ -344,7 +344,7 @@ EOF
 
   chown -R www-data:www-data "$ROOT"
 
-  echo "$DOMAIN | $DB_NAME | $DB_USER | $DB_PASS | $APP_PASS | $APP_PASS_PLAIN" \
+  echo "$DOMAIN | $DB_NAME | $DB_USER | $DB_PASS | $APP_PASS" \
     >> "$REPORT_FILE"
 
   touch "$ROOT/.installed"
