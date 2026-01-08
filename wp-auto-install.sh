@@ -6,9 +6,9 @@ set -Euo pipefail
 # CONFIG
 ####################################
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
-DOMAINS_FILE="/home/ubuntu/domains.txt"
+DOMAINS_FILE="$SCRIPT_DIR/domains.txt"
 BASE_ROOT="/var/www"
-REPORT_FILE="/home/ubuntu/install-report.txt"
+REPORT_FILE="$SCRIPT_DIR/install-report.txt"
 
 PLUGIN_DIR="$SCRIPT_DIR/plugin"
 THEME_DIR="$SCRIPT_DIR/theme"
@@ -22,7 +22,7 @@ PUB_PASS="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 
 APP_NAME="publisher-app"
 
-PARALLEL_JOBS=3
+PARALLEL_JOBS=10
 CERTBOT_LOCK="/var/run/certbot-global.lock"
 
 # News site titles and taglines

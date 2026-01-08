@@ -4,9 +4,10 @@ set -Euo pipefail
 ####################################
 # CONFIG
 ####################################
-DOMAINS_FILE="/home/ubuntu/domains.txt"
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+DOMAINS_FILE="$SCRIPT_DIR/domains.txt"
 BASE_ROOT="/var/www"
-REPORT_FILE="/home/ubuntu/install-report.txt"
+REPORT_FILE="$SCRIPT_DIR/install-report.txt"
 
 ####################################
 # LOGGING
