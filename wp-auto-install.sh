@@ -202,7 +202,8 @@ install_domain(){
   [ -f "$ROOT/.installed" ] && LOG "SKIPPED $DOMAIN" && exit 0
   LOG "START DOMAIN: $DOMAIN"
 
-  DB_NAME="wp_${DOMAIN//./_}"
+  DB_SUFFIX=$(openssl rand -hex 4)
+  DB_NAME="wp_${DOMAIN//./_}_${DB_SUFFIX}"
   DB_USER="u_${DB_NAME:0:12}"
   DB_PASS=$(openssl rand -base64 16)
   ADMIN_EMAIL="admin@$DOMAIN"
