@@ -126,6 +126,9 @@ delete_all(){
   sudo rm -rf /etc/mysql
   sudo rm -rf /var/log/mysql
 
+  # Clear /tmp
+  sudo rm -rf /tmp/*
+
   # Remove MySQL root password file
   sudo rm -f /root/.mysql_root_pass
 
