@@ -330,15 +330,10 @@ EOF
 
   # Set favicon
   if [ -d "$ICON_DIR" ]; then
-    shopt -s nullglob
-    PNG_FILES=("$ICON_DIR"/*.png)
-    shopt -u nullglob
-    if [ ${#PNG_FILES[@]} -gt 0 ]; then
-      RANDOM_PNG=${PNG_FILES[$RANDOM % ${#PNG_FILES[@]}]}
-      if [ -f "$RANDOM_PNG" ]; then
-        ATTACHMENT_ID=$(sudo -u www-data wp media import "$RANDOM_PNG" --porcelain)
-        sudo -u www-data wp option update site_icon "$ATTACHMENT_ID"
-      fi
+    RANDOM_PNG=$(ls "$ICON_DIR"/*.png 2>/dev/null | shuf -n1)
+    if [ -n "$RANDOM_PNG" ] && [ -f "$RANDOM_PNG" ]; then
+      ATTACHMENT_ID=$(sudo -u www-data wp media import "$RANDOM_PNG" --porcelain)
+      sudo -u www-data wp option update site_icon "$ATTACHMENT_ID"
     fi
   fi
 
