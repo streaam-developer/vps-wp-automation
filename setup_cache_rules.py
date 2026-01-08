@@ -31,35 +31,46 @@ def get_cache_ruleset(zone_id):
         return None
 
     for rs in r["result"]:
-        if rs["phase"] == "http_request_cache_settings":
+        if rs.get("phase") == "http_request_cache_settings":
             return rs["id"]
     return None
 
-def clear_and_add_cache_everything(zone_id, ruleset_id):
-    url = f"{API}/zones/{zone_id}/rulesets/{ruleset_id}"
+def create_cache_ruleset(zone_id):
+    r = requests.post(
+        f"{API}/zones/{zone_id}/rulesets",
+        headers=HEADERS,
+        json={
+            "name": "Auto Cache Rules",
+            "kind": "zone",
+            "phase": "http_request_cache_settings",
+            "rules": []
+        }
+    )
+    if r.status_code in (200, 201):
+        return r.json()["result"]["id"]
+    return None
 
-    payload = {
-        "rules": [
-            {
-                "description": "Cache Everything (auto-managed)",
-                "expression": "true",
-                "action": "set_cache_settings",
-                "action_parameters": {
-                    "cache": True,
-                    "browser_ttl": {
-                        "mode": "override_origin",
-                        "default": 86400
-                    },
-                    "edge_ttl": {
-                        "mode": "override",
-                        "default": 86400
+def clear_and_add_cache_everything(zone_id, ruleset_id):
+    r = requests.put(
+        f"{API}/zones/{zone_id}/rulesets/{ruleset_id}",
+        headers=HEADERS,
+        json={
+            "rules": [
+                {
+                    "description": "Cache Everything (Free plan safe)",
+                    "expression": "true",
+                    "action": "set_cache_settings",
+                    "action_parameters": {
+                        "cache": True,
+                        "edge_ttl": {
+                            "mode": "override_origin",
+                            "default": 86400
+                        }
                     }
                 }
-            }
-        ]
-    }
-
-    r = requests.put(url, headers=HEADERS, json=payload)
+            ]
+        }
+    )
     return r.status_code, r.text
 
 # ===================== MAIN =====================
@@ -77,13 +88,17 @@ for domain in domains:
 
     ruleset_id = get_cache_ruleset(zone_id)
     if not ruleset_id:
-        print("❌ Cache ruleset not found")
+        print("ℹ Cache ruleset not found — creating one")
+        ruleset_id = create_cache_ruleset(zone_id)
+
+    if not ruleset_id:
+        print("❌ Failed to create cache ruleset")
         continue
 
     status, response = clear_and_add_cache_everything(zone_id, ruleset_id)
 
     if status == 200:
-        print("✅ Old rules removed & Cache Everything applied")
+        print("✅ Cache Everything applied (Free plan)")
     else:
         print(f"❌ Failed ({status})")
         print(response)
