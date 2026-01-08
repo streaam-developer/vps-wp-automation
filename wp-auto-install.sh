@@ -110,7 +110,11 @@ FLUSH PRIVILEGES;
 EOF
     echo "$MYSQL_ROOT_PASS" | sudo tee /root/.mysql_root_pass >/dev/null
   else
-    MYSQL_ROOT_PASS=$(sudo cat /root/.mysql_root_pass)
+    if [ -f /root/.mysql_root_pass ]; then
+      MYSQL_ROOT_PASS=$(sudo cat /root/.mysql_root_pass)
+    else
+      MYSQL_ROOT_PASS="rMuD@e5HH5vuvJE"
+    fi
   fi
 
   export MYSQL_ROOT_PASS
