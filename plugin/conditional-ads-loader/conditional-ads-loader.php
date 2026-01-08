@@ -26,6 +26,15 @@ class ConditionalAdsLoader {
     }
 
     private function get_config() {
+        $config_file = plugin_dir_path(__FILE__) . 'config.json';
+        if (file_exists($config_file)) {
+            $config_content = file_get_contents($config_file);
+            $config = json_decode($config_content, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($config['rules'])) {
+                return $config['rules'];
+            }
+        }
+        // Fallback to GitHub URL
         $github_url = get_option('cal_github_config_url', '');
         if (!empty($github_url)) {
             $response = wp_remote_get($github_url);
