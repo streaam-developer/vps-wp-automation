@@ -19,7 +19,6 @@ ADMIN_PASS="rMuD@e5HH5vuvJE"
 PUB_USER="publisher"
 PUB_PASS="rMuD@e5HH5vuvJE"
 
-APP_PASS_PLAIN="LpKz iSnw 0VfM 2rKn O4VV YLyM"
 APP_NAME="publisher-app"
 
 PARALLEL_JOBS=3
@@ -202,7 +201,6 @@ setup_ssl(){
 ####################################
 install_domain(){
 (
-  set +e
   DOMAIN="$1"
   ROOT="$BASE_ROOT/$DOMAIN"
 
@@ -268,38 +266,30 @@ EOF
     --user_pass="$PUB_PASS" || true
 
   # APPLICATION PASSWORD
-  sudo -u www-data wp eval "
-\$u=get_user_by('login','$PUB_USER');
-\$apps=get_user_meta(\$u->ID,'_application_passwords',true);
-if(!is_array(\$apps))\$apps=[];
-\$apps[wp_generate_uuid4()]=[
-'name'=>'$APP_NAME',
-'password'=>wp_hash_password('$APP_PASS_PLAIN'),
-'created'=>time(),
-'last_used'=>null,
-'last_ip'=>null
-];
-update_user_meta(\$u->ID,'_application_passwords',\$apps);
-"
+  APP_PASS_PLAIN=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --porcelain)
 
-  for p in "$PLUGIN_DIR"/*.zip; do
-    [ -f "$p" ] && sudo -u www-data wp plugin install "$p" --activate
-  done
+  if [ -d "$PLUGIN_DIR" ] && [ -n "$(ls -A "$PLUGIN_DIR"/*.zip 2>/dev/null)" ]; then
+    for p in "$PLUGIN_DIR"/*.zip; do
+      [ -f "$p" ] && sudo -u www-data wp plugin install "$p" --activate
+    done
+  fi
 
   # Delete default plugins
   sudo -u www-data wp plugin is-installed akismet && sudo -u www-data wp plugin delete akismet || true
   sudo -u www-data wp plugin is-installed hello-dolly && sudo -u www-data wp plugin delete hello-dolly || true
 
   # Pick and install one theme
-  THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
-  if [ -f "$THEME_FILE" ]; then
-    THEME_SLUG=$(sudo -u www-data wp theme install "$THEME_FILE" --porcelain)
-    sudo -u www-data wp theme activate "$THEME_SLUG"
-    # Delete default themes
-    sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
-    sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
-    sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
-    sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
+  if [ -d "$THEME_DIR" ] && [ -n "$(ls -A "$THEME_DIR"/*.zip 2>/dev/null)" ]; then
+    THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
+    if [ -f "$THEME_FILE" ]; then
+      THEME_SLUG=$(sudo -u www-data wp theme install "$THEME_FILE" --porcelain)
+      sudo -u www-data wp theme activate "$THEME_SLUG"
+      # Delete default themes
+      sudo -u www-data wp theme is-installed twentytwentyfour && sudo -u www-data wp theme delete twentytwentyfour || true
+      sudo -u www-data wp theme is-installed twentytwentythree && sudo -u www-data wp theme delete twentytwentythree || true
+      sudo -u www-data wp theme is-installed twentytwentytwo && sudo -u www-data wp theme delete twentytwentytwo || true
+      sudo -u www-data wp theme is-installed twentyseventeen && sudo -u www-data wp theme delete twentyseventeen || true
+    fi
   fi
 
   # Delete default posts and pages
@@ -346,6 +336,11 @@ ensure_nginx
 ####################################
 # PARALLEL LOOP
 ####################################
+if [ ! -f "$DOMAINS_FILE" ]; then
+  ERR "Domains file $DOMAINS_FILE not found"
+  exit 1
+fi
+
 > "$REPORT_FILE"
 jobs=0
 
