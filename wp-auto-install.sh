@@ -5,13 +5,14 @@ set -Euo pipefail
 ####################################
 # CONFIG
 ####################################
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 DOMAINS_FILE="/home/ubuntu/domains.txt"
 BASE_ROOT="/var/www"
 REPORT_FILE="/home/ubuntu/install-report.txt"
 
-PLUGIN_DIR="/home/ubuntu/wp-auto-req/plugin"
-THEME_DIR="/home/ubuntu/wp-auto-req/theme"
-ICON_DIR="/home/ubuntu/wp-auto-req/icon"
+PLUGIN_DIR="$SCRIPT_DIR/plugin"
+THEME_DIR="$SCRIPT_DIR/theme"
+ICON_DIR="$SCRIPT_DIR/icon"
 
 ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
