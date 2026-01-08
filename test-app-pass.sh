@@ -21,8 +21,10 @@ if [ -z "$APP_PASS" ]; then
 fi
 
 # Test the app password using REST API
-if curl -s -u "publisher:$APP_PASS" "https://$DOMAIN/wp-json/wp/v2/users/me" | grep -q '"id"'; then
+RESPONSE=$(curl -s -u "publisher:$APP_PASS" "https://$DOMAIN/wp-json/wp/v2/users/me")
+if echo "$RESPONSE" | grep -q '"id"'; then
   echo "Application password for $DOMAIN is working"
 else
   echo "Application password for $DOMAIN is not working"
+  echo "Response: $RESPONSE"
 fi
