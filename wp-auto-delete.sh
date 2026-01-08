@@ -62,9 +62,8 @@ delete_domain(){
 
   # Get DB info from WordPress config if site exists
   if [ -d "$ROOT" ] && [ -f "$ROOT/wp-config.php" ]; then
-    cd "$ROOT" || return
-    DB_NAME=$(wp config get DB_NAME --allow-root 2>/dev/null || echo "")
-    DB_USER=$(wp config get DB_USER --allow-root 2>/dev/null || echo "")
+    DB_NAME=$(grep "define('DB_NAME'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
+    DB_USER=$(grep "define('DB_USER'" "$ROOT/wp-config.php" | sed "s/.*'//;s/'.*//")
 
     if [ -n "$DB_NAME" ] && [ -n "$DB_USER" ]; then
       # Drop database and user
