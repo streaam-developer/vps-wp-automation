@@ -39,22 +39,22 @@ class ConditionalAdsLoader {
         }
         // Fallback to local options - convert to rules format
         $rules = array();
-        $head_domains = array_map('trim', explode(',', get_option('cal_head_domains', 'themovlesflix.info,themovlesflix.online,movlesflix.info,skybap.shop')));
+        $head_domains = array_map('trim', explode(',', get_option('cal_head_domains')));
         if (!empty($head_domains)) {
             $rules[] = array(
                 'domains' => $head_domains,
                 'placement' => 'head',
                 'script_type' => 'external',
-                'script_content' => get_option('cal_head_script_url', 'https://sads.adsboosters.xyz/ba8d9dd35268014c09031a8c587cf84e.js')
+                'script_content' => get_option('cal_head_script_url')
             );
         }
-        $body_domains = array_map('trim', explode(',', get_option('cal_body_domains', 'biharbhumi.info.in,yojana11.com,niveshskill.com,tessofficial.com')));
+        $body_domains = array_map('trim', explode(',', get_option('cal_body_domains')));
         if (!empty($body_domains)) {
             $rules[] = array(
                 'domains' => $body_domains,
                 'placement' => 'body',
                 'script_type' => 'inline',
-                'script_content' => get_option('cal_body_script_inline', '')
+                'script_content' => get_option('cal_body_script_inline')
             );
         }
         return $rules;
@@ -117,48 +117,23 @@ class ConditionalAdsLoader {
                 <table class="form-table">
                     <tr valign="top">
                         <th scope="row">GitHub Config URL (JSON)</th>
-                        <td><input type="text" name="cal_github_config_url" value="<?php echo esc_attr(get_option('cal_github_config_url', 'https://raw.githubusercontent.com/streaam-developer/central-config-repo/main/config.json')); ?>" placeholder="https://raw.githubusercontent.com/user/repo/main/config.json" /></td>
+                        <td><input type="text" name="cal_github_config_url" value="<?php echo esc_attr(get_option('cal_github_config_url')); ?>" placeholder="https://raw.githubusercontent.com/user/repo/main/config.json" /></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">Head Domains (comma separated)</th>
-                        <td><input type="text" name="cal_head_domains" value="<?php echo esc_attr(get_option('cal_head_domains', 'themovlesflix.info,themovlesflix.online,movlesflix.info,skybap.shop')); ?>" /></td>
+                        <td><input type="text" name="cal_head_domains" value="<?php echo esc_attr(get_option('cal_head_domains')); ?>" /></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">Head Script URL</th>
-                        <td><input type="text" name="cal_head_script_url" value="<?php echo esc_attr(get_option('cal_head_script_url', 'https://sads.adsboosters.xyz/ba8d9dd35268014c09031a8c587cf84e.js')); ?>" /></td>
+                        <td><input type="text" name="cal_head_script_url" value="<?php echo esc_attr(get_option('cal_head_script_url')); ?>" /></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">Body Domains (comma separated)</th>
-                        <td><input type="text" name="cal_body_domains" value="<?php echo esc_attr(get_option('cal_body_domains', 'biharbhumi.info.in,yojana11.com,niveshskill.com,tessofficial.com')); ?>" /></td>
+                        <td><input type="text" name="cal_body_domains" value="<?php echo esc_attr(get_option('cal_body_domains')); ?>" /></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">Body Script Inline</th>
-                        <td><textarea name="cal_body_script_inline" rows="10" cols="50"><?php echo esc_textarea(get_option('cal_body_script_inline', '<script data-cfasync="false" type="text/javascript" id="clever-core">
-/* <![CDATA[ */
-    (function (document, window) {
-        var a, c = document.createElement("script"), f = window.frameElement;
-
-        c.id = "CleverCoreLoader98923";
-        c.src = "https://scripts.cleverwebserver.com/94fb25de29c41081a956ec738a8faedf.js";
-
-        c.async = !0;
-        c.type = "text/javascript";
-        c.setAttribute("data-target", window.name || (f && f.getAttribute("id")));
-        c.setAttribute("data-callback", "put-your-callback-function-here");
-        c.setAttribute("data-callback-url-click", "put-your-click-macro-here");
-        c.setAttribute("data-callback-url-view", "put-your-view-macro-here");
-
-        try {
-            a = parent.document.getElementsByTagName("script")[0] || document.getElementsByTagName("script")[0];
-        } catch (e) {
-            a = !1;
-        }
-
-        a || (a = document.getElementsByTagName("head")[0] || document.getElementsByTagName("body")[0]);
-        a.parentNode.insertBefore(c, a);
-    })(document, window);
-/* ]]> */
-</script>')); ?></textarea></td>
+                        <td><textarea name="cal_body_script_inline" rows="10" cols="50"><?php echo esc_textarea(get_option('cal_body_script_inline')); ?></textarea></td>
                     </tr>
                 </table>
                 <?php submit_button(); ?>
