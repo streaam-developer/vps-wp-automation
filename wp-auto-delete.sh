@@ -108,54 +108,60 @@ EOF
 # DELETE ALL
 ####################################
 delete_all(){
- LOG "START DELETE ALL"
+  LOG "START DELETE ALL"
 
- # Drop all user databases
- for DB in $(mysql -u root -p"$MYSQL_ROOT_PASS" -e "SHOW DATABASES;" | grep -v Database | grep -v mysql | grep -v information_schema | grep -v performance_schema); do
-   mysql -u root -p"$MYSQL_ROOT_PASS" -e "DROP DATABASE IF EXISTS \`$DB\`;"
- done
+  # Stop MariaDB
+  sudo systemctl stop mariadb || true
 
- # Drop all users except root
- for USER in $(mysql -u root -p"$MYSQL_ROOT_PASS" -e "SELECT User FROM mysql.user WHERE User != 'root' AND Host = 'localhost';" | grep -v User); do
-   mysql -u root -p"$MYSQL_ROOT_PASS" -e "DROP USER '$USER'@'localhost';"
- done
+  # Purge MariaDB and MySQL packages
+  sudo apt-get purge -y mariadb-server mariadb-client mariadb-common mysql-server mysql-client mysql-common || true
 
- mysql -u root -p"$MYSQL_ROOT_PASS" -e "FLUSH PRIVILEGES;"
+  # Remove MySQL/MariaDB data and config directories
+  sudo rm -rf /var/lib/mysql
+  sudo rm -rf /etc/mysql
+  sudo rm -rf /var/log/mysql
 
- # Remove all site files
- rm -rf "$BASE_ROOT"/*
+  # Remove MySQL root password file
+  sudo rm -f /root/.mysql_root_pass
 
- # Remove nginx configs
- rm -f /etc/nginx/sites-available/*
- rm -f /etc/nginx/sites-enabled/*
- nginx -t && systemctl reload nginx || WARN "nginx reload failed"
+  # Autoremove and autoclean
+  sudo apt-get autoremove -y
+  sudo apt-get autoclean
 
- # Remove SSL certs
- if [ -f "$DOMAINS_FILE" ]; then
-   while read -r DOMAIN; do
-     [ -z "$DOMAIN" ] && continue
-     certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
-   done < "$DOMAINS_FILE"
- fi
+  # Remove all site files
+  rm -rf "$BASE_ROOT"/*
 
- # Clear report file
- > "$REPORT_FILE"
+  # Remove nginx configs
+  rm -f /etc/nginx/sites-available/*
+  rm -f /etc/nginx/sites-enabled/*
+  nginx -t && systemctl reload nginx || WARN "nginx reload failed"
 
- LOG "DONE DELETE ALL"
+  # Remove SSL certs
+  if [ -f "$DOMAINS_FILE" ]; then
+    while read -r DOMAIN; do
+      [ -z "$DOMAIN" ] && continue
+      certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+    done < "$DOMAINS_FILE"
+  fi
+
+  # Clear report file
+  > "$REPORT_FILE"
+
+  LOG "DONE DELETE ALL"
 }
 
 ####################################
 # BOOTSTRAP
 ####################################
-setup_mysql
-wait_for_mysql
-
-####################################
-# DELETE LOOP
-####################################
 if [ "${1:-}" = "--all" ]; then
   delete_all
 else
+  setup_mysql
+  wait_for_mysql
+
+  ####################################
+  # DELETE LOOP
+  ####################################
   while read -r DOMAIN; do
     [ -z "$DOMAIN" ] && continue
     delete_domain "$DOMAIN"
