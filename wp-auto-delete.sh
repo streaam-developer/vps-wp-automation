@@ -105,6 +105,46 @@ EOF
 }
 
 ####################################
+# DELETE ALL
+####################################
+delete_all(){
+ LOG "START DELETE ALL"
+
+ # Drop all user databases
+ for DB in $(mysql -u root -p"$MYSQL_ROOT_PASS" -e "SHOW DATABASES;" | grep -v Database | grep -v mysql | grep -v information_schema | grep -v performance_schema); do
+   mysql -u root -p"$MYSQL_ROOT_PASS" -e "DROP DATABASE IF EXISTS \`$DB\`;"
+ done
+
+ # Drop all users except root
+ for USER in $(mysql -u root -p"$MYSQL_ROOT_PASS" -e "SELECT User FROM mysql.user WHERE User != 'root' AND Host = 'localhost';" | grep -v User); do
+   mysql -u root -p"$MYSQL_ROOT_PASS" -e "DROP USER '$USER'@'localhost';"
+ done
+
+ mysql -u root -p"$MYSQL_ROOT_PASS" -e "FLUSH PRIVILEGES;"
+
+ # Remove all site files
+ rm -rf "$BASE_ROOT"/*
+
+ # Remove nginx configs
+ rm -f /etc/nginx/sites-available/*
+ rm -f /etc/nginx/sites-enabled/*
+ nginx -t && systemctl reload nginx || WARN "nginx reload failed"
+
+ # Remove SSL certs
+ if [ -f "$DOMAINS_FILE" ]; then
+   while read -r DOMAIN; do
+     [ -z "$DOMAIN" ] && continue
+     certbot delete --cert-name $DOMAIN --non-interactive || WARN "SSL delete failed for $DOMAIN"
+   done < "$DOMAINS_FILE"
+ fi
+
+ # Clear report file
+ > "$REPORT_FILE"
+
+ LOG "DONE DELETE ALL"
+}
+
+####################################
 # BOOTSTRAP
 ####################################
 setup_mysql
@@ -113,9 +153,13 @@ wait_for_mysql
 ####################################
 # DELETE LOOP
 ####################################
-while read -r DOMAIN; do
-  [ -z "$DOMAIN" ] && continue
-  delete_domain "$DOMAIN"
-done < "$DOMAINS_FILE"
+if [ "${1:-}" = "--all" ]; then
+  delete_all
+else
+  while read -r DOMAIN; do
+    [ -z "$DOMAIN" ] && continue
+    delete_domain "$DOMAIN"
+  done < "$DOMAINS_FILE"
+fi
 
 LOG "🎉 ALL DELETES DONE"
