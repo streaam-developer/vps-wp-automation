@@ -271,7 +271,7 @@ EOF
     --user_pass="$PUB_PASS" || true
 
   # Create application password
-  APP_PASS=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --porcelain)
+  APP_PASS=$(sudo -u www-data wp user application-password create "$PUB_USER" "$APP_NAME" --password="$APP_PASS_PLAIN" --porcelain)
 
   # APPLICATION PASSWORD
   APP_PASS_PLAIN="LpKz iSnw 0VfM 2rKn O4VV YLyM"
