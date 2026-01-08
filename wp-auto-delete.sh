@@ -22,21 +22,24 @@ setup_mysql(){
   sudo systemctl enable mariadb
   sudo systemctl start mariadb
 
-  if mysql -u root -e "SELECT 1;" >/dev/null 2>&1; then
-    MYSQL_ROOT_PASS="rMuD@e5HH5vuvJE"
-    mysql <<EOF
+  MYSQL_ROOT_PASS="rMuD@e5HH5vuvJE"
+
+  if mysql -u root -p"$MYSQL_ROOT_PASS" -e "SELECT 1;" >/dev/null 2>&1; then
+    LOG "MySQL root password is already set correctly"
+  else
+    if mysql -u root -e "SELECT 1;" >/dev/null 2>&1; then
+      LOG "Setting MySQL root password"
+      mysql <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASS';
 FLUSH PRIVILEGES;
 EOF
-    echo "$MYSQL_ROOT_PASS" | sudo tee /root/.mysql_root_pass >/dev/null
-  else
-    if [ -f /root/.mysql_root_pass ]; then
-      MYSQL_ROOT_PASS=$(sudo cat /root/.mysql_root_pass)
     else
-      MYSQL_ROOT_PASS="rMuD@e5HH5vuvJE"
+      ERR "MySQL root has a password set that is not the expected one. Please reset MariaDB or run delete --all first."
+      exit 1
     fi
   fi
 
+  echo "$MYSQL_ROOT_PASS" | sudo tee /root/.mysql_root_pass >/dev/null
   export MYSQL_ROOT_PASS
 }
 
