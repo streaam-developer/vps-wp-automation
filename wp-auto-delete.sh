@@ -4,6 +4,7 @@ set -Euo pipefail
 ####################################
 # CONFIG
 ####################################
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 DOMAINS_FILE="$SCRIPT_DIR/domains.txt"
 BASE_ROOT="/var/www"
 REPORT_FILE="$SCRIPT_DIR/install-report.txt"
