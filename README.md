@@ -85,6 +85,12 @@ Deletes WordPress sites and all associated data for domains in `domains.txt`.
 sudo bash wp-auto-delete.sh
 ```
 
+#### Complete Removal:
+To completely remove MariaDB and MySQL from the server:
+```bash
+sudo systemctl stop mariadb; sudo apt-get purge -y mariadb-server mysql-server; sudo rm -rf /var/lib/mysql /etc/mysql /var/log/mysql /root/.mysql_root_pass; sudo apt-get autoremove -y; sudo apt-get autoclean
+```
+
 #### Note:
 Ensure `domains.txt` contains the domains to delete. The script reads database info from the report file to clean up properly.
 
