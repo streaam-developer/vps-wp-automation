@@ -1,6 +1,6 @@
 #!/bin/bash
 set -Euo pipefail
-# ❌ no set -e (never auto-exit)
+# Advanced WordPress Auto-Installer with enhanced features
 
 ####################################
 # CONFIG
@@ -206,6 +206,7 @@ install_domain(){
   DB_NAME="wp_${DOMAIN//./_}_${DB_SUFFIX}"
   DB_USER="u_${DB_NAME:0:12}"
   DB_PASS=$(openssl rand -base64 16)
+  DB_PASS_HASH=$(mysql -u root -p"$MYSQL_ROOT_PASS" -e "SELECT PASSWORD('$DB_PASS');" | tail -n1)
   ADMIN_EMAIL="admin@$DOMAIN"
 
   # Pick random title and tagline
@@ -224,7 +225,7 @@ install_domain(){
 
   mysql -u root -p"$MYSQL_ROOT_PASS" <<EOF
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;
-CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASS_HASH';
 GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';
 FLUSH PRIVILEGES;
 EOF
