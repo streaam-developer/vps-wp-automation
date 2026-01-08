@@ -298,7 +298,7 @@ EOF
       [ -f "$t" ] && sudo -u www-data wp theme install "$t" || true
     done
     # Get list of installed themes, excluding defaults
-    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=stylesheet --status=inactive --status=active | grep -v -E '(twentytwentyfive|twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
+    INSTALLED_THEMES=$(sudo -u www-data wp theme list --field=name --status=inactive --status=active | grep -v -E '(twentytwentyfive|twentytwentyfour|twentytwentythree|twentytwentytwo|twentyseventeen)' || true)
     if [ -n "$INSTALLED_THEMES" ]; then
       # Pick random theme to activate
       THEME_TO_ACTIVATE=$(echo "$INSTALLED_THEMES" | shuf | head -1)
