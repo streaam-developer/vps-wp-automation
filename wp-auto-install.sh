@@ -281,14 +281,13 @@ update_user_meta(\$u->ID,'_application_passwords',\$apps);
 
   # Delete default plugins
   wp plugin is-installed akismet && wp plugin delete akismet --allow-root || true
-  wp plugin is-installed hello && wp plugin delete hello --allow-root || true
+  wp plugin is-installed hello-dolly && wp plugin delete hello-dolly --allow-root || true
 
   # Pick and install one theme
   THEME_FILE=$(ls "$THEME_DIR"/*.zip 2>/dev/null | head -1)
   if [ -f "$THEME_FILE" ]; then
-    THEME_NAME=$(basename "$THEME_FILE" .zip)
-    wp theme install "$THEME_FILE" --allow-root
-    wp theme activate "$THEME_NAME" --allow-root
+    THEME_SLUG=$(wp theme install "$THEME_FILE" --porcelain --allow-root)
+    wp theme activate "$THEME_SLUG" --allow-root
     # Delete default themes
     wp theme is-installed twentytwentyfour && wp theme delete twentytwentyfour --allow-root || true
     wp theme is-installed twentytwentythree && wp theme delete twentytwentythree --allow-root || true
@@ -296,8 +295,9 @@ update_user_meta(\$u->ID,'_application_passwords',\$apps);
     wp theme is-installed twentyseventeen && wp theme delete twentyseventeen --allow-root || true
   fi
 
-  # Delete default post
-  wp post delete 1 --force --allow-root || true
+  # Delete default posts and pages
+  wp post list --post_type=post --allow-root --format=ids | xargs wp post delete --force --allow-root || true
+  wp post list --post_type=page --allow-root --format=ids | xargs wp post delete --force --allow-root || true
 
   # Set permalink structure
   wp rewrite structure '/%postname%/' --allow-root
