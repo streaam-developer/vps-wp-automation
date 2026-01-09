@@ -1,46 +1,94 @@
 #!/bin/bash
-set -Euo pipefail
+set -Eeuo pipefail
 
-REPORT_FILE="/home/ubuntu/install-report.txt"
-DOMAINS_FILE="/home/ubuntu/domains.txt"
+REPORT_FILE="install-report.txt"
+DOMAINS_FILE="domains.txt"
+WP_USER="publisher"
+PARALLEL_WORKERS=5   # 🔥 change as needed
 
-if [ ! -f "$DOMAINS_FILE" ]; then
-  echo "Domains file $DOMAINS_FILE not found"
-  exit 1
-fi
+WORKING_FILE="$(mktemp)"
+FAILED_FILE="$(mktemp)"
 
-while IFS= read -r DOMAIN; do
-  # Skip empty lines
-  [ -z "$DOMAIN" ] && continue
+cleanup() {
+  rm -f "$WORKING_FILE" "$FAILED_FILE"
+}
+trap cleanup EXIT
 
-  echo "Testing domain: $DOMAIN"
+# -------- checks ----------
+[[ ! -f "$DOMAINS_FILE" ]] && { echo "❌ domains.txt not found"; exit 1; }
+[[ ! -f "$REPORT_FILE" ]] && { echo "❌ install-report.txt not found"; exit 1; }
 
-  # Find the line for the domain
-  LINE=$(grep "^$DOMAIN " "$REPORT_FILE" || true)
+# -------- function ----------
+check_domain() {
+  DOMAIN="$1"
 
-  if [ -z "$LINE" ]; then
-    echo "Domain $DOMAIN not found in report"
-    continue
+  echo "🔍 Testing domain: $DOMAIN"
+
+  LINE=$(grep -i "domain[[:space:]]*:[[:space:]]*$DOMAIN" "$REPORT_FILE" || true)
+  if [[ -z "$LINE" ]]; then
+    echo "❌ Domain not found in report"
+    echo "$DOMAIN | NOT FOUND IN REPORT" >> "$FAILED_FILE"
+    echo "----------------------------------------"
+    return
   fi
 
-  # Parse APP_PASS (last field)
-  APP_PASS=$(echo "$LINE" | awk -F'|' '{print $NF}' | xargs)
-
-  if [ -z "$APP_PASS" ]; then
-    echo "APP_PASS not found for $DOMAIN"
-    continue
+  APP_PASS=$(echo "$LINE" | sed -n 's/.*application pass:[[:space:]]*//Ip' | tr -d '\r')
+  if [[ -z "$APP_PASS" ]]; then
+    echo "❌ Application password missing"
+    echo "$DOMAIN | NO APP PASSWORD" >> "$FAILED_FILE"
+    echo "----------------------------------------"
+    return
   fi
 
-  # Test the app password using REST API
-  RESPONSE=$(curl -s -u "publisher:$APP_PASS" "https://$DOMAIN/wp-json/wp/v2/users/me")
-  echo "APP_PASS: $APP_PASS"
-  if echo "$RESPONSE" | grep -q '"id"'; then
-    echo "Application password for $DOMAIN is working"
+  # Mask password (safe display)
+  if (( ${#APP_PASS} > 10 )); then
+    MASKED_PASS="${APP_PASS:0:4}****${APP_PASS: -6}"
   else
-    echo "Application password for $DOMAIN is not working"
-    echo "Response: $RESPONSE"
+    MASKED_PASS="****"
+  fi
+  echo "🔐 Testing APP_PASS: $MASKED_PASS"
+
+  RESPONSE=$(curl -sS --max-time 10 \
+    -u "$WP_USER:$APP_PASS" \
+    "https://$DOMAIN/wp-json/wp/v2/users/me" || true)
+
+  if echo "$RESPONSE" | grep -q '"id"'; then
+    echo "✅ RESULT: WORKING"
+    echo "$DOMAIN" >> "$WORKING_FILE"
+  else
+    echo "❌ RESULT: NOT WORKING"
+    echo "🔎 Response: $RESPONSE"
+    echo "$DOMAIN" >> "$FAILED_FILE"
   fi
 
   echo "----------------------------------------"
+}
 
-done < "$DOMAINS_FILE"
+export -f check_domain
+export REPORT_FILE WP_USER WORKING_FILE FAILED_FILE
+
+# -------- parallel run ----------
+grep -v '^[[:space:]]*$' "$DOMAINS_FILE" | \
+  xargs -n 1 -P "$PARALLEL_WORKERS" -I {} bash -c 'check_domain "$@"' _ {}
+
+# -------- final summary ----------
+echo
+echo "================ FINAL SUMMARY ================"
+
+echo
+echo "✅ WORKING DOMAINS:"
+if [[ -s "$WORKING_FILE" ]]; then
+  sort -u "$WORKING_FILE"
+else
+  echo "None"
+fi
+
+echo
+echo "❌ NOT WORKING DOMAINS:"
+if [[ -s "$FAILED_FILE" ]]; then
+  sort -u "$FAILED_FILE"
+else
+  echo "None"
+fi
+
+echo "=============================================="
