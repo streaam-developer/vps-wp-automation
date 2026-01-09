@@ -5,7 +5,7 @@ import random
 import os
 
 # Read local config.json
-with open('config.json', 'r') as f:
+with open('/home/ubuntu/vps-wp-automation/config.json', 'r') as f:
     config = json.load(f)
 
 # Read report
@@ -40,7 +40,7 @@ for line in report.strip().split('\n'):
             })
 
 # Write updated config back to local file
-with open('config.json', 'w') as f:
+with open('/home/ubuntu/vps-wp-automation/config.json', 'w') as f:
     json.dump(config, f, indent=2)
 
 print("Config updated locally successfully.")
