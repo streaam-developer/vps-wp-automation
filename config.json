@@ -20,14 +20,19 @@
         {
           "base_url": "https://dailykhabar.sbs/",
           "username": "publisher",
-          "application_password": "Hof3c62vslYffL15B3x4KjCJ",
+          "application_password": "9EP0wgEgDPgYiUC3K9aYNbzf",
           "category": "business"
         },
-        
         {
           "base_url": "https://biharbhumi.info.in/",
           "username": "publisher",
-          "application_password": "FC4jPiAIrHIqyObayb1hJzHo",
+          "application_password": "EWLUeX4eP8AtDzAHogGfNKRp",
+          "category": "business"
+        },
+        {
+          "base_url": "https://themovlesflix.info/",
+          "username": "publisher",
+          "application_password": "R0fJQsTjSug7HVk0j6IAohXp",
           "category": "business"
         }
       ]
@@ -48,25 +53,25 @@
         {
           "base_url": "https://dailykhabar.cyou/",
           "username": "publisher",
-          "application_password": "HxWin7XBHnOBFvDxilvTJA7D",
+          "application_password": "biVz5vR96bDeINDJx29ObuDu",
           "category": "entertainment"
         },
         {
           "base_url": "https://indiapulse.online/",
           "username": "publisher",
-          "application_password": "nNmMVwKO6yu8i7HNHIFt8qdU",
+          "application_password": "lJY164cx436crroKQaD0nJwX",
           "category": "entertainment"
         },
         {
           "base_url": "https://indiapulse.site/",
           "username": "publisher",
-          "application_password": "qdNKAE02A6GKAa5yjUeb3Ciw",
+          "application_password": "G071xGGGmYIsGvMRmz2gf8cC",
           "category": "entertainment"
         },
         {
           "base_url": "https://indiapulse.cfd/",
           "username": "publisher",
-          "application_password": "Hvu9QhwZcr8LTj63RRgpgy3c",
+          "application_password": "XSC1KwvrxY4zlspO6XRYhcVF",
           "category": "entertainment"
         }
       ]
@@ -87,25 +92,31 @@
         {
           "base_url": "https://yojana11.com/",
           "username": "publisher",
-          "application_password": "jF3GCBdETA0OUC7LnpBCied6",
+          "application_password": "9xyEGM6DEWzJz5oM8F1P7S5I",
           "category": "cricket"
         },
         {
           "base_url": "https://indiapulse.website/",
           "username": "publisher",
-          "application_password": "il6UJStwPg0wYI8DmdKEHi1u",
+          "application_password": "oQsIkIK1JL4DV30J8egf5RhL",
           "category": "cricket"
         },
         {
           "base_url": "https://niveshskill.com/",
           "username": "publisher",
-          "application_password": "vsaYQhK56UAOR0witabQmLDL",
+          "application_password": "H6EwVmaod3qyTnkfkhF6BeMu",
           "category": "cricket"
         },
         {
           "base_url": "https://tessofficial.com/",
           "username": "publisher",
-          "application_password": "WrkVefuwdXkBuDPoD8cXyfpE",
+          "application_password": "ghvDUdCXUzNUGcNZFh1YA17h",
+          "category": "cricket"
+        },
+        {
+          "base_url": "https://dailykhabar.cfd/",
+          "username": "publisher",
+          "application_password": "uL6SMwJGH2I4iSY5X2xtRC8M",
           "category": "cricket"
         }
       ]
@@ -126,10 +137,27 @@
         {
           "base_url": "https://dailykhabar.bond/",
           "username": "publisher",
-          "application_password": "wN6pp4pwd3yQ6kJ80RjO7pc7",
+          "application_password": "Ih0EXw3xd6p27kzetcMKNSbK",
           "category": "business"
+        },
+        {
+          "base_url": "https://movlesflix.info/",
+          "username": "publisher",
+          "application_password": "YVvNjZxKKLCom1iwGwekTeTn",
+          "category": "latest"
+        },
+        {
+          "base_url": "https://skybap.shop/",
+          "username": "publisher",
+          "application_password": "keQAtTtZKhna1rPJG1sDe2DQ",
+          "category": "latest"
+        },
+        {
+          "base_url": "https://themovlesflix.online/",
+          "username": "publisher",
+          "application_password": "jlNW7V5674jklghVqwmrqCtm",
+          "category": "latest"
         }
-       
       ]
     }
   ]
