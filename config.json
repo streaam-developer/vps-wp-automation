@@ -23,12 +23,7 @@
           "application_password": "Hof3c62vslYffL15B3x4KjCJ",
           "category": "business"
         },
-        {
-          "base_url": "https://dailykhabar.bond/",
-          "username": "publisher",
-          "application_password": "wN6pp4pwd3yQ6kJ80RjO7pc7",
-          "category": "business"
-        },
+        
         {
           "base_url": "https://biharbhumi.info.in/",
           "username": "publisher",
@@ -128,6 +123,12 @@
       "default_tags": [],
       "post_type": "posts",
       "domains": [
+        {
+          "base_url": "https://dailykhabar.bond/",
+          "username": "publisher",
+          "application_password": "wN6pp4pwd3yQ6kJ80RjO7pc7",
+          "category": "business"
+        }
        
       ]
     }
