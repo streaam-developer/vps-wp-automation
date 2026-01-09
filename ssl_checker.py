@@ -26,7 +26,7 @@ def check_and_add_ssl(domain):
     
     print(f'Getting SSL for {domain}')
     cmd = [
-        'certbot', '--nginx',
+        'sudo', 'certbot', '--nginx',
         '-d', domain,
         '-d', f'www.{domain}',
         '--non-interactive',
