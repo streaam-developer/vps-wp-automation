@@ -345,7 +345,7 @@ EOF
 
   chown -R www-data:www-data "$ROOT"
 
-  echo "$DOMAIN | $DB_NAME | $DB_USER | $DB_PASS | $APP_PASS" \
+  echo "domain : $DOMAIN | application pass: $APP_PASS" \
     >> "$REPORT_FILE"
 
   touch "$ROOT/.installed"

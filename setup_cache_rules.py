@@ -57,6 +57,22 @@ def clear_and_add_cache_everything(zone_id, ruleset_id):
         json={
             "rules": [
                 {
+                    "description": "Bypass cache for wp-admin",
+                    "expression": "http.request.uri.path contains \"/wp-admin/\"",
+                    "action": "set_cache_settings",
+                    "action_parameters": {
+                        "cache": False
+                    }
+                },
+                {
+                    "description": "Bypass cache for logged-in users",
+                    "expression": "http.cookie contains \"wordpress_logged_in\"",
+                    "action": "set_cache_settings",
+                    "action_parameters": {
+                        "cache": False
+                    }
+                },
+                {
                     "description": "Cache Everything (Free plan safe)",
                     "expression": "true",
                     "action": "set_cache_settings",
