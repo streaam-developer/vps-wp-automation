@@ -25,6 +25,7 @@ APP_NAME="publisher-app"
 
 PARALLEL_JOBS=2
 CERTBOT_LOCK="/var/run/certbot-global.lock"
+CONFIG_LOCK="$SCRIPT_DIR/config-update.lock"
 
 # News site titles and taglines
 TITLES=(
@@ -352,6 +353,12 @@ EOF
   echo "domain : $DOMAIN | application pass: $APP_PASS" \
     >> "$REPORT_FILE"
 
+  # Update config.json immediately after creating app pass
+  (
+    flock -x 300
+    python3 "$SCRIPT_DIR/update_config.py" || WARN "Config update failed for $DOMAIN"
+  ) 300>"$CONFIG_LOCK"
+
   touch "$ROOT/.installed"
   LOG "DONE DOMAIN: $DOMAIN"
 ) || ERR "FAILED DOMAIN: $1"
@@ -404,6 +411,3 @@ done < "$DOMAINS_FILE"
 wait
 LOG "🎉 ALL DOMAINS DONE"
 LOG "📄 REPORT: $REPORT_FILE"
-
-# Update config.json on GitHub with application passwords
-python3 "$SCRIPT_DIR/update_config.py" || WARN "Config update failed"
