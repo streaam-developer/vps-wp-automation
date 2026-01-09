@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-CONFIG_PATH = '/home/ubuntu/vps-wp-automation/config.json'
+CONFIG_PATH = 'config.json'
 
 def load_domains():
     with open(CONFIG_PATH, 'r') as f:
