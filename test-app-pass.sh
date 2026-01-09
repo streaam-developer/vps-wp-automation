@@ -1,8 +1,8 @@
 #!/bin/bash
 set -Euo pipefail
 
-REPORT_FILE="/home/ubuntu/install-report.txt"
-DOMAINS_FILE="/home/ubuntu/domains.txt"
+REPORT_FILE="install-report.txt"
+DOMAINS_FILE="domains.txt"
 
 if [ ! -f "$DOMAINS_FILE" ]; then
   echo "Domains file $DOMAINS_FILE not found"
