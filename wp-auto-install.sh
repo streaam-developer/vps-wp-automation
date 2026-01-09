@@ -404,3 +404,15 @@ done < "$DOMAINS_FILE"
 wait
 LOG "🎉 ALL DOMAINS DONE"
 LOG "📄 REPORT: $REPORT_FILE"
+
+# Pull latest config from GitHub
+cd "$SCRIPT_DIR"
+git pull origin main || WARN "Git pull failed"
+
+# Update config.json with application passwords
+python3 "$SCRIPT_DIR/update_config.py" || WARN "Config update failed"
+
+# Push updated config to GitHub
+git add config.json
+git commit -m "Update config with new application passwords" || LOG "No changes to commit"
+git push origin main || WARN "Git push failed"
