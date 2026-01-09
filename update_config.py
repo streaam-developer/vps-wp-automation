@@ -9,7 +9,7 @@ with open('/home/ubuntu/vps-wp-automation/config.json', 'r') as f:
     config = json.load(f)
 
 # Read report
-with open('install-report.txt', 'r') as f:
+with open('/home/ubuntu/vps-wp-automation/install-report.txt', 'r') as f:
     report = f.read()
 
 # Parse lines
