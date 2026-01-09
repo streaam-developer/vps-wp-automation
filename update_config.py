@@ -3,29 +3,10 @@ import json
 import re
 import random
 import os
-import requests
-import base64
 
-# ------------------- 🔑 PRIVATE REPO ACCESS (classic token) -------------------
-# Recommended: set GITHUB_TOKEN in your environment instead of hardcoding
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "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")
-REPO = "streaam-developer/central-config-repo"
-FILE_PATH = "config.json"
-BRANCH = "main"
-
-REMOTE_ENV_URL = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}?ref={BRANCH}"
-
-headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-
-# Fetch config from GitHub
-response = requests.get(REMOTE_ENV_URL, headers=headers)
-if response.status_code != 200:
-    print(f"Failed to fetch config from GitHub. Status: {response.status_code}, Response: {response.text}")
-    exit(1)
-
-data = response.json()
-config = json.loads(base64.b64decode(data['content']).decode('utf-8'))
-sha = data['sha']
+# Read local config.json
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
 # Read report
 with open('install-report.txt', 'r') as f:
@@ -58,20 +39,8 @@ for line in report.strip().split('\n'):
                 'category': category
             })
 
-# Encode new config
-new_content = json.dumps(config, indent=2)
-encoded = base64.b64encode(new_content.encode('utf-8')).decode('utf-8')
+# Write updated config back to local file
+with open('config.json', 'w') as f:
+    json.dump(config, f, indent=2)
 
-# Update on GitHub
-update_data = {
-    "message": "Update config with new application passwords",
-    "content": encoded,
-    "sha": sha,
-    "branch": BRANCH
-}
-
-response = requests.put(REMOTE_ENV_URL, headers=headers, json=update_data)
-if response.status_code == 200:
-    print("Config updated on GitHub successfully.")
-else:
-    print("Failed to update config on GitHub:", response.text)
+print("Config updated locally successfully.")

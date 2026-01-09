@@ -56,11 +56,13 @@ function enqueue_domain_redirect_and_ad_script() {
                 var adData = domainScripts[domain];
                 if (adData) {
                     var scriptHtml = adData.script;
-                    if (adData.placement === 'head') {
-                        document.head.insertAdjacentHTML('beforeend', scriptHtml);
-                    } else if (adData.placement === 'footer') {
-                        document.body.insertAdjacentHTML('beforeend', scriptHtml);
+                    var adContainer = document.querySelector('.stack-ads');
+                    if (!adContainer) {
+                        adContainer = document.createElement('div');
+                        adContainer.className = 'stack-ads';
+                        document.body.appendChild(adContainer);
                     }
+                    adContainer.insertAdjacentHTML('beforeend', scriptHtml);
                 }
             }
 
