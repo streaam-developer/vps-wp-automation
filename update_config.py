@@ -20,7 +20,7 @@ headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 # Fetch config from GitHub
 response = requests.get(REMOTE_ENV_URL, headers=headers)
 if response.status_code != 200:
-    print("Failed to fetch config from GitHub")
+    print(f"Failed to fetch config from GitHub. Status: {response.status_code}, Response: {response.text}")
     exit(1)
 
 data = response.json()
