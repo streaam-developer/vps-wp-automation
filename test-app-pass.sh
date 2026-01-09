@@ -1,44 +1,55 @@
 #!/bin/bash
-set -Euo pipefail
+set -Eeuo pipefail
 
 REPORT_FILE="install-report.txt"
 DOMAINS_FILE="domains.txt"
+WP_USER="publisher"
 
-if [ ! -f "$DOMAINS_FILE" ]; then
-  echo "Domains file $DOMAINS_FILE not found"
+# Check required files
+if [[ ! -f "$DOMAINS_FILE" ]]; then
+  echo "❌ domains.txt not found"
   exit 1
 fi
 
-while IFS= read -r DOMAIN; do
+if [[ ! -f "$REPORT_FILE" ]]; then
+  echo "❌ install-report.txt not found"
+  exit 1
+fi
+
+while IFS= read -r DOMAIN || [[ -n "$DOMAIN" ]]; do
   # Skip empty lines
-  [ -z "$DOMAIN" ] && continue
+  [[ -z "$DOMAIN" ]] && continue
 
-  echo "Testing domain: $DOMAIN"
+  echo "🔍 Testing domain: $DOMAIN"
 
-  # Find the line for the domain
-  LINE=$(grep "^$DOMAIN " "$REPORT_FILE" || true)
+  # Match exact domain line
+  LINE=$(grep -i "domain[[:space:]]*:[[:space:]]*$DOMAIN" "$REPORT_FILE" || true)
 
-  if [ -z "$LINE" ]; then
-    echo "Domain $DOMAIN not found in report"
+  if [[ -z "$LINE" ]]; then
+    echo "❌ Domain not found in report"
+    echo "----------------------------------------"
     continue
   fi
 
-  # Parse APP_PASS (last field)
-  APP_PASS=$(echo "$LINE" | awk -F'|' '{print $NF}' | xargs)
+  # Extract application password
+  APP_PASS=$(echo "$LINE" | sed -n 's/.*application pass:[[:space:]]*//Ip' | tr -d '\r')
 
-  if [ -z "$APP_PASS" ]; then
-    echo "APP_PASS not found for $DOMAIN"
+  if [[ -z "$APP_PASS" ]]; then
+    echo "❌ Application password missing"
+    echo "----------------------------------------"
     continue
   fi
 
-  # Test the app password using REST API
-  RESPONSE=$(curl -s -u "publisher:$APP_PASS" "https://$DOMAIN/wp-json/wp/v2/users/me")
-  echo "APP_PASS: $APP_PASS"
+  # Test WordPress REST API
+  RESPONSE=$(curl -sS --max-time 10 \
+    -u "$WP_USER:$APP_PASS" \
+    "https://$DOMAIN/wp-json/wp/v2/users/me" || true)
+
   if echo "$RESPONSE" | grep -q '"id"'; then
-    echo "Application password for $DOMAIN is working"
+    echo "✅ Application password WORKING"
   else
-    echo "Application password for $DOMAIN is not working"
-    echo "Response: $RESPONSE"
+    echo "❌ Application password NOT working"
+    echo "🔎 Response: $RESPONSE"
   fi
 
   echo "----------------------------------------"
