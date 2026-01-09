@@ -3,5 +3,5 @@ dailykhabar.cfd
 indiapulse.cfd
 indiapulse.online
 dailykhabar.cyou
-
+indiapulse.site
 dailykhabar.sbs
