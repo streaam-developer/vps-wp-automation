@@ -24,12 +24,6 @@
           "category": "business"
         },
         {
-          "base_url": "https://dailykhabar.cfd/",
-          "username": "publisher",
-          "application_password": "qTmYpc8wLktdyVjMm5FUjNYy",
-          "category": "business"
-        },
-        {
           "base_url": "https://dailykhabar.bond/",
           "username": "publisher",
           "application_password": "wN6pp4pwd3yQ6kJ80RjO7pc7",
@@ -134,30 +128,7 @@
       "default_tags": [],
       "post_type": "posts",
       "domains": [
-        {
-          "base_url": "https://themovlesflix.info/",
-          "username": "publisher",
-          "application_password": "ocViqeEQ5K8kNo5SbFIq2vb7",
-          "category": "latest"
-        },
-        {
-          "base_url": "https://themovlesflix.online/",
-          "username": "publisher",
-          "application_password": "JagXkL7tXs2QCd6zgDzIiEN7",
-          "category": "latest"
-        },
-        {
-          "base_url": "https://movlesflix.info/",
-          "username": "publisher",
-          "application_password": "sJngn5gdCSPOwxXHwcMHxTur",
-          "category": "latest"
-        },
-        {
-          "base_url": "https://skybap.shop/",
-          "username": "publisher",
-          "application_password": "10tMnLZE2p4kKERauPMFqklv",
-          "category": "latest"
-        }
+       
       ]
     }
   ]
