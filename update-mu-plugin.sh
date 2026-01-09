@@ -1,16 +1,14 @@
 #!/bin/bash
-# Update the central must-use plugin
+# Update permissions for the central must-use plugin
 
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
-CENTRAL_MU="/var/www/mu-plugins"
-PLUGIN_FILE="$SCRIPT_DIR/plugin/central-mu-plugin.php"
+CENTRAL_MU="$SCRIPT_DIR/central-mu"
 
-if [ ! -f "$PLUGIN_FILE" ]; then
-    echo "Plugin file not found: $PLUGIN_FILE"
+if [ ! -d "$CENTRAL_MU" ]; then
+    echo "Central MU directory not found: $CENTRAL_MU"
     exit 1
 fi
 
-cp "$PLUGIN_FILE" "$CENTRAL_MU/"
-chown www-data:www-data "$CENTRAL_MU/central-mu-plugin.php"
+chown -R www-data:www-data "$CENTRAL_MU"
 
-echo "Central MU plugin updated successfully."
+echo "Central MU plugin permissions updated successfully."
