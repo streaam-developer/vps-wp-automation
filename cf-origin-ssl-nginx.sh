@@ -1,5 +1,4 @@
-
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 DOMAINS_FILE="domains.txt"
