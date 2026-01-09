@@ -13,6 +13,7 @@ REPORT_FILE="$SCRIPT_DIR/install-report.txt"
 PLUGIN_DIR="$SCRIPT_DIR/plugin"
 THEME_DIR="$SCRIPT_DIR/theme"
 ICON_DIR="$SCRIPT_DIR/icon"
+CENTRAL_MU="/var/www/mu-plugins"
 
 ADMIN_USER="admin"
 ADMIN_PASS="rMuD@e5HH5vuvJE"
@@ -265,6 +266,9 @@ EOF
     --admin_email="$ADMIN_EMAIL" \
     --skip-email || exit 1
 
+  # Symlink central mu-plugins
+  ln -sf "$CENTRAL_MU" "$ROOT/wp-content/mu-plugins"
+
   sudo -u www-data wp option update blogdescription "$TAGLINE"
 
   sudo -u www-data wp user create "$PUB_USER" "publisher@$DOMAIN" \
@@ -362,6 +366,14 @@ detect_php_fpm
 setup_mysql
 wait_for_mysql
 ensure_nginx
+
+# Create central mu-plugins
+mkdir -p "$CENTRAL_MU"
+chown www-data:www-data "$CENTRAL_MU"
+
+# Copy the central must-use plugin from local repo
+cp "$SCRIPT_DIR/plugin/central-mu-plugin.php" "$CENTRAL_MU/"
+chown www-data:www-data "$CENTRAL_MU/central-mu-plugin.php"
 
 # Add default server
 if [ ! -f /etc/nginx/sites-available/default ]; then
