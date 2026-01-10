@@ -2,8 +2,8 @@ import requests
 import concurrent.futures
 import os
 
-CF_EMAIL = os.getenv("cf_email")
-CF_API_KEY = os.getenv("cf_api_key")
+CF_EMAIL = os.getenv("CF_EMAIL")
+CF_API_KEY = os.getenv("CF_API_KEY")
 
 HEADERS = {
     "X-Auth-Email": CF_EMAIL,
