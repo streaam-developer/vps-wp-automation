@@ -402,7 +402,7 @@ def process_multiple_posts():
     posts_collection = db['posts']
 
     filter_query = {'$or': [{'failed_at': {'$exists': False}}, {'failed_at': {'$lt': datetime.utcnow() - timedelta(minutes=30)}}]}
-    pending_posts = list(posts_collection.find(filter_query, sort=[('created_at', 1)], limit=10))
+    pending_posts = list(posts_collection.find(filter_query, sort=[('created_at', 1)], limit=4))
 
     if not pending_posts:
         logging.info("No pending posts found.")
